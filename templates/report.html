@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Incident - SafeRoute</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .incident-card { border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 10px; margin-bottom: 20px; }
+        .incident-type { cursor: pointer; transition: all 0.3s; border-radius: 8px; margin-bottom: 10px; }
+        .incident-type:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .incident-type.selected { border: 2px solid #007bff; background: rgba(0,123,255,0.1); }
+        .location-capture { background: #f8f9fa; border-radius: 10px; padding: 20px; }
+        .submit-btn { background: linear-gradient(45deg, #667eea, #764ba2); border: none; }
+        .anonymous-toggle { background: #28a745; border-radius: 25px; }
+        .severity-indicator { height: 6px; border-radius: 3px; transition: all 0.3s; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #4c51bf;">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-shield-alt me-2"></i>SafeRoute</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/map">Find Safe Route</a>
+                <a class="nav-link active" href="/report">Report Incident</a>
+                <a class="nav-link" href="/emergency">Emergency</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-4">
+                    <h2 class="text-primary mb-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Report Safety Incident
+                    </h2>
+                    <p class="text-muted">Help keep our community safe by reporting incidents. Your report helps others avoid unsafe areas.</p>
+                </div>
+
+                <form id="incidentForm" class="incident-card p-4">
+                    <!-- Incident Type Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-list-alt me-2 text-primary"></i>Type of Incident *
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4">
+                                <div class="incident-type p-3 text-center" data-type="harassment">
+                                    <i class="fas fa-user-times fa-2x text-danger mb-2"></i>
+                                    <div class="fw-bold">Harassment</div>
+                                    <small class="text-muted">Verbal/Physical harassment</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="incident-type p-3 text-center" data-type="stalking">
+                                    <i class="fas fa-eye fa-2x text-warning mb-2"></i>
+                                    <div class="fw-bold">Stalking</div>
+                                    <small class="text-muted">Being followed</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="incident-type p-3 text-center" data-type="poor-lighting">
+                                    <i class="fas fa-lightbulb fa-2x text-secondary mb-2"></i>
+                                    <div class="fw-bold">Poor Lighting</div>
+                                    <small class="text-muted">Dark/unsafe area</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="incident-type p-3 text-center" data-type="theft">
+                                    <i class="fas fa-hand-paper fa-2x text-danger mb-2"></i>
+                                    <div class="fw-bold">Theft/Robbery</div>
+                                    <small class="text-muted">Snatching/stealing</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="incident-type p-3 text-center" data-type="inappropriate">
+                                    <i class="fas fa-comments fa-2x text-warning mb-2"></i>
+                                    <div class="fw-bold">Inappropriate Behavior</div>
+                                    <small class="text-muted">Catcalling/teasing</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="incident-type p-3 text-center" data-type="other">
+                                    <i class="fas fa-ellipsis-h fa-2x text-info mb-2"></i>
+                                    <div class="fw-bold">Other</div>
+                                    <small class="text-muted">Specify below</small>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedIncidentType" name="incident_type" required>
+                    </div>
+
+                    <!-- Severity Level -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-thermometer-half me-2 text-primary"></i>Severity Level *
+                        </label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="severity" id="low" value="low" required>
+                                    <label class="form-check-label" for="low">
+                                        <span class="badge bg-success">Low</span> - Minor discomfort
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="severity" id="medium" value="medium">
+                                    <label class="form-check-label" for="medium">
+                                        <span class="badge bg-warning text-dark">Medium</span> - Concerning situation
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="severity" id="high" value="high">
+                                    <label class="form-check-label" for="high">
+                                        <span class="badge bg-danger">High</span> - Immediate danger
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Capture -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>Incident Location
+                        </label>
+                        <div class="location-capture">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="text" id="locationInput" class="form-control mb-2" placeholder="Enter location or address" name="location">
+                                    <div id="currentLocation" class="text-muted small"></div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <button type="button" onclick="getCurrentLocation()" class="btn btn-success mb-2">
+                                        <i class="fas fa-crosshairs me-1"></i>Use Current Location
+                                    </button>
+                                    <div id="locationAccuracy" class="text-muted small"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label for="description" class="form-label fw-bold">
+                            <i class="fas fa-align-left me-2 text-primary"></i>Incident Description
+                        </label>
+                        <textarea class="form-control" id="description" name="description" rows="4" 
+                                  placeholder="Please describe what happened. The more details you provide, the better we can help others stay safe."></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Include time, people involved, and any other relevant details
+                        </div>
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="incidentDate" class="form-label fw-bold">
+                                <i class="fas fa-calendar me-2 text-primary"></i>Date of Incident *
+                            </label>
+                            <input type="date" class="form-control" id="incidentDate" name="incident_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="incidentTime" class="form-label fw-bold">
+                                <i class="fas fa-clock me-2 text-primary"></i>Time of Incident
+                            </label>
+                            <input type="time" class="form-control" id="incidentTime" name="incident_time">
+                        </div>
+                    </div>
+
+                    <!-- Privacy Options -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center p-3" style="background: #f8f9fa; border-radius: 8px;">
+                            <div>
+                                <div class="fw-bold">
+                                    <i class="fas fa-user-secret me-2 text-success"></i>Anonymous Report
+                                </div>
+                                <small class="text-muted">Your identity will be kept confidential</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="anonymousReport" name="anonymous" checked>
+                                <label class="form-check-label" for="anonymousReport"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information (Optional) -->
+                    <div id="contactInfo" class="mb-4" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="reporterName" class="form-label">Your Name</label>
+                                <input type="text" class="form-control" id="reporterName" name="reporter_name" placeholder="Optional">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="reporterPhone" class="form-label">Contact Number</label>
+                                <input type="tel" class="form-control" id="reporterPhone" name="reporter_phone" placeholder="Optional">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn submit-btn text-white btn-lg px-5">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Report
+                        </button>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Your report helps build a safer community for everyone
+                            </small>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Recent Reports (Optional Display) -->
+                <div class="mt-5">
+                    <h4 class="mb-3">
+                        <i class="fas fa-chart-line me-2 text-info"></i>Community Safety Status
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 text-success">127</div>
+                                <small>Reports This Month</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 text-warning">23</div>
+                                <small>Areas Improved</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 text-info">8.5k</div>
+                                <small>Women Protected</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentLocationData = null;
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default
+            document.getElementById('incidentDate').valueAsDate = new Date();
+            
+            // Setup incident type selection
+            setupIncidentTypeSelection();
+            
+            // Setup form submission
+            setupFormSubmission();
+            
+            // Setup anonymous toggle
+            setupAnonymousToggle();
+        });
+
+        function setupIncidentTypeSelection() {
+            document.querySelectorAll('.incident-type').forEach(element => {
+                element.addEventListener('click', function() {
+                    // Remove selection from all
+                    document.querySelectorAll('.incident-type').forEach(el => el.classList.remove('selected'));
+                    
+                    // Add selection to clicked
+                    this.classList.add('selected');
+                    
+                    // Set hidden input value
+                    document.getElementById('selectedIncidentType').value = this.dataset.type;
+                });
+            });
+        }
+
+        function setupFormSubmission() {
+    document.getElementById('incidentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validate required fields
+        if (!document.getElementById('selectedIncidentType').value) {
+            alert('Please select an incident type');
+            return;
+        }
+
+        const submitBtn = document.querySelector('.submit-btn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting Report...';
+        submitBtn.disabled = true;
+
+        // Gather form data
+        const payload = {
+            incident_type: document.getElementById('selectedIncidentType').value,
+            severity: document.querySelector('input[name="severity"]:checked')?.value || "",
+            location: document.getElementById('locationInput').value,
+            latitude: currentLocationData?.lat || null,
+            longitude: currentLocationData?.lng || null,
+            incident_date: document.getElementById('incidentDate').value,
+            incident_time: document.getElementById('incidentTime').value,
+            description: document.getElementById('description').value,
+            anonymous: document.getElementById('anonymousReport').checked,
+            reporter_name: document.getElementById('reporterName').value,
+            reporter_phone: document.getElementById('reporterPhone').value
+        };
+
+        // Send data to Flask
+        fetch('/api/submit-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Thank you! Your incident report has been submitted successfully.');
+                this.reset();
+                document.querySelectorAll('.incident-type').forEach(el => el.classList.remove('selected'));
+                document.getElementById('incidentDate').valueAsDate = new Date();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Failed to submit report: ' + error);
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+}
+
+
+        function setupAnonymousToggle() {
+            document.getElementById('anonymousReport').addEventListener('change', function() {
+                const contactInfo = document.getElementById('contactInfo');
+                if (this.checked) {
+                    contactInfo.style.display = 'none';
+                } else {
+                    contactInfo.style.display = 'block';
+                }
+            });
+        }
+
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                const btn = event.target;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Getting Location...';
+                btn.disabled = true;
+                
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    currentLocationData = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    // Reverse geocode to get address
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLocationData.lat}&lon=${currentLocationData.lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.display_name) {
+                                document.getElementById('locationInput').value = data.display_name;
+                                document.getElementById('currentLocation').innerHTML = 
+                                    `<i class="fas fa-check-circle text-success me-1"></i>Location captured successfully`;
+                                document.getElementById('locationAccuracy').innerHTML = 
+                                    `Accuracy: ${Math.round(currentLocationData.accuracy)}m`;
+                            }
+                        })
+                        .finally(() => {
+                            btn.innerHTML = '<i class="fas fa-crosshairs me-1"></i>Use Current Location';
+                            btn.disabled = false;
+                        });
+                }, function(error) {
+                    alert('Error getting location: ' + error.message);
+                    btn.innerHTML = '<i class="fas fa-crosshairs me-1"></i>Use Current Location';
+                    btn.disabled = false;
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+    </script>
+</body>
+</html>

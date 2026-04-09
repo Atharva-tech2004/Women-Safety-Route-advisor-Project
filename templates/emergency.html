@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Help - SafeRoute</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sos-button {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, #dc3545, #b02a37);
+            border: 8px solid #fff; box-shadow: 0 0 20px rgba(220,53,69,0.5);
+            animation: sosGlow 2s infinite alternate;
+        }
+        @keyframes sosGlow {
+            0% { box-shadow: 0 0 20px rgba(220,53,69,0.5); }
+            100% { box-shadow: 0 0 40px rgba(220,53,69,0.8), 0 0 60px rgba(220,53,69,0.4); }
+        }
+        .emergency-card { border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .emergency-card:hover { transform: translateY(-5px); }
+        .helpline-btn { border-radius: 25px; padding: 15px 25px; margin: 5px; transition: all 0.3s; }
+        .helpline-btn:hover { transform: scale(1.05); }
+        .quick-contact { background: linear-gradient(45deg, #28a745, #20c997); }
+        .panic-mode { background: #dc3545; animation: flashRed 1s infinite; }
+        @keyframes flashRed { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #4c51bf;">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-shield-alt me-2"></i>SafeRoute</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/map">Find Safe Route</a>
+                <a class="nav-link" href="/report">Report Incident</a>
+                <a class="nav-link active" href="/emergency">Emergency</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- SOS Section -->
+        <div class="text-center mb-5">
+            <h2 class="text-danger mb-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>Emergency Assistance
+            </h2>
+            <p class="text-muted mb-4">Immediate help is just one tap away. Stay calm and get help quickly.</p>
+            
+            <!-- Main SOS Button -->
+            <div class="d-flex justify-content-center mb-4">
+                <button class="btn sos-button text-white d-flex flex-column align-items-center justify-content-center" 
+                        onclick="activateSOS()" id="sosButton">
+                    <i class="fas fa-hand-paper fa-3x mb-2"></i>
+                    <div class="h5 mb-0">SOS</div>
+                    <small>EMERGENCY</small>
+                </button>
+            </div>
+            
+            <div class="alert alert-warning">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Press and hold for 3 seconds</strong> to activate emergency mode. Your location will be shared with emergency contacts.
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Quick Emergency Contacts -->
+            <div class="col-lg-6 mb-4">
+                <div class="emergency-card p-4 h-100">
+                    <h4 class="text-danger mb-3">
+                        <i class="fas fa-phone-alt me-2"></i>Emergency Helplines
+                    </h4>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="tel:100" class="btn helpline-btn text-white" style="background: #dc3545;">
+                            <i class="fas fa-shield-alt me-2"></i><strong>Police - 100</strong>
+                            <div><small>For immediate law enforcement assistance</small></div>
+                        </a>
+                        
+                        <a href="tel:181" class="btn helpline-btn text-white" style="background: #e83e8c;">
+                            <i class="fas fa-female me-2"></i><strong>Women Helpline - 181</strong>
+                            <div><small>24x7 support for women in distress</small></div>
+                        </a>
+                        
+                        <a href="tel:108" class="btn helpline-btn text-white" style="background: #fd7e14;">
+                            <i class="fas fa-ambulance me-2"></i><strong>Ambulance - 108</strong>
+                            <div><small>Medical emergency services</small></div>
+                        </a>
+                        
+                        <a href="tel:1098" class="btn helpline-btn text-white" style="background: #6610f2;">
+                            <i class="fas fa-child me-2"></i><strong>Child Helpline - 1098</strong>
+                            <div><small>For children in need of care</small></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Emergency Contacts -->
+            <div class="col-lg-6 mb-4">
+                <div class="emergency-card p-4 h-100">
+                    <h4 class="text-success mb-3">
+                        <i class="fas fa-users me-2"></i>Personal Emergency Contacts
+                    </h4>
+                    
+                    <div id="personalContacts">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-address-book fa-3x mb-3"></i>
+                            <p>No emergency contacts added yet</p>
+                            <button class="btn btn-success" onclick="addEmergencyContact()">
+                                <i class="fas fa-plus me-2"></i>Add Emergency Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="emergency-card p-3 text-center quick-contact text-white">
+                    <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                    <div class="fw-bold">Share Location</div>
+                    <small>Send current location via SMS</small>
+                    <button class="btn btn-light btn-sm mt-2" onclick="shareLocation()">Share Now</button>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="emergency-card p-3 text-center" style="background: #6f42c1; color: white;">
+                    <i class="fas fa-video fa-2x mb-2"></i>
+                    <div class="fw-bold">Record Evidence</div>
+                    <small>Start recording video/audio</small>
+                    <button class="btn btn-light btn-sm mt-2" onclick="startRecording()">Record</button>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="emergency-card p-3 text-center" style="background: #20c997; color: white;">
+                    <i class="fas fa-route fa-2x mb-2"></i>
+                    <div class="fw-bold">Safe Route Home</div>
+                    <small>Get quickest safe route</small>
+                    <button class="btn btn-light btn-sm mt-2" onclick="findSafeRouteHome()">Get Route</button>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="emergency-card p-3 text-center" style="background: #fd7e14; color: white;">
+                    <i class="fas fa-bell fa-2x mb-2"></i>
+                    <div class="fw-bold">Fake Call</div>
+                    <small>Simulate incoming call</small>
+                    <button class="btn btn-light btn-sm mt-2" onclick="fakeCall()">Start Call</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Tips -->
+        <div class="emergency-card p-4">
+            <h4 class="text-info mb-3">
+                <i class="fas fa-lightbulb me-2"></i>Emergency Safety Tips
+            </h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Stay calm and try to move to a public area</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Keep your phone charged and accessible</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Trust your instincts - if something feels wrong, get help</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Share your location with trusted contacts regularly</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Know the local emergency numbers by heart</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Keep emergency contacts easily accessible</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOS Activation Modal -->
+    <div class="modal fade" id="sosModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-body text-center p-5 panic-mode text-white">
+                    <i class="fas fa-exclamation-triangle fa-4x mb-3"></i>
+                    <h3>SOS ACTIVATED!</h3>
+                    <p class="mb-4">Emergency alerts are being sent to your contacts and authorities</p>
+                    <div id="sosCountdown" class="h2 mb-4">3</div>
+                    <button class="btn btn-light btn-lg" onclick="cancelSOS()">
+                        <i class="fas fa-times me-2"></i>Cancel (if false alarm)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div class="modal fade" id="addContactModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Emergency Contact</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="contactName" class="form-label">Contact Name *</label>
+                            <input type="text" class="form-control" id="contactName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactPhone" class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" id="contactPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactRelation" class="form-label">Relationship</label>
+                            <select class="form-control" id="contactRelation">
+                                <option value="Family">Family Member</option>
+                                <option value="Friend">Friend</option>
+                                <option value="Colleague">Colleague</option>
+                                <option value="Neighbor">Neighbor</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="saveEmergencyContact()">Save Contact</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let sosTimeout = null;
+        let sosCountdownInterval = null;
+        let emergencyContacts = JSON.parse(localStorage.getItem('emergencyContacts') || '[]');
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEmergencyContacts();
+        });
+
+        function activateSOS() {
+            const sosButton = document.getElementById('sosButton');
+            let holdTime = 0;
+            
+            // Start hold timer
+            sosTimeout = setTimeout(() => {
+                // After 3 seconds, activate SOS
+                triggerSOS();
+            }, 3000);
+            
+            // Visual feedback during hold
+            const holdInterval = setInterval(() => {
+                holdTime += 100;
+                const progress = Math.min(holdTime / 3000, 1);
+                sosButton.style.transform = `scale(${1 + progress * 0.2})`;
+                
+                if (holdTime >= 3000) {
+                    clearInterval(holdInterval);
+                }
+            }, 100);
+            
+            // Cancel if mouse/finger released
+            sosButton.addEventListener('mouseup', cancelSOSHold);
+            sosButton.addEventListener('touchend', cancelSOSHold);
+            
+            function cancelSOSHold() {
+                clearTimeout(sosTimeout);
+                clearInterval(holdInterval);
+                sosButton.style.transform = 'scale(1)';
+                sosButton.removeEventListener('mouseup', cancelSOSHold);
+                sosButton.removeEventListener('touchend', cancelSOSHold);
+            }
+        }
+
+        function triggerSOS() {
+            // Show SOS modal
+            const sosModal = new bootstrap.Modal(document.getElementById('sosModal'));
+            sosModal.show();
+            
+            // Start countdown
+            let countdown = 3;
+            document.getElementById('sosCountdown').textContent = countdown;
+            
+            sosCountdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('sosCountdown').textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(sosCountdownInterval);
+                    executeSOS();
+                }
+            }, 1000);
+        }
+
+        function executeSOS() {
+            // Get current location and send alerts
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    sendEmergencyAlerts(location);
+                });
+            } else {
+                sendEmergencyAlerts(null);
+            }
+        }
+
+        function sendEmergencyAlerts(location) {
+            const locationText = location ? 
+                `Location: https://maps.google.com/?q=${location.lat},${location.lng}` : 
+                'Location: Unable to determine';
+            
+            const message = `🚨 EMERGENCY ALERT! I need immediate help! ${locationText} - Sent from SafeRoute`;
+            
+            // Send SMS to emergency contacts
+            emergencyContacts.forEach(contact => {
+                const smsUrl = `sms:${contact.phone}?body=${encodeURIComponent(message)}`;
+                window.open(smsUrl, '_blank');
+            });
+            
+            // Call police automatically (simulate)
+            alert(`Emergency alerts sent to ${emergencyContacts.length} contacts!\n\nLocation shared: ${locationText}\n\nConsider calling 100 (Police) if needed.`);
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('sosModal')).hide();
+        }
+
+        function cancelSOS() {
+            clearInterval(sosCountdownInterval);
+            bootstrap.Modal.getInstance(document.getElementById('sosModal')).hide();
+        }
+
+        function addEmergencyContact() {
+            const modal = new bootstrap.Modal(document.getElementById('addContactModal'));
+            modal.show();
+        }
+
+        function saveEmergencyContact() {
+            const name = document.getElementById('contactName').value;
+            const phone = document.getElementById('contactPhone').value;
+            const relation = document.getElementById('contactRelation').value;
+            
+            if (!name || !phone) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const contact = { name, phone, relation, id: Date.now() };
+            emergencyContacts.push(contact);
+            localStorage.setItem('emergencyContacts', JSON.stringify(emergencyContacts));
+            
+            loadEmergencyContacts();
+            bootstrap.Modal.getInstance(document.getElementById('addContactModal')).hide();
+            
+            // Clear form
+            document.getElementById('contactForm').reset();
+        }
+
+        function loadEmergencyContacts() {
+            const container = document.getElementById('personalContacts');
+            
+            if (emergencyContacts.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-address-book fa-3x mb-3"></i>
+                        <p>No emergency contacts added yet</p>
+                        <button class="btn btn-success" onclick="addEmergencyContact()">
+                            <i class="fas fa-plus me-2"></i>Add Emergency Contact
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="d-grid gap-2">';
+            emergencyContacts.forEach(contact => {
+                html += `
+                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                        <div>
+                            <div class="fw-bold">${contact.name}</div>
+                            <small class="text-muted">${contact.relation} • ${contact.phone}</small>
+                        </div>
+                        <div>
+                            <a href="tel:${contact.phone}" class="btn btn-sm btn-success me-2">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeContact(${contact.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>
+                     <button class="btn btn-success w-100 mt-3" onclick="addEmergencyContact()">
+                         <i class="fas fa-plus me-2"></i>Add Another Contact
+                     </button>`;
+            
+            container.innerHTML = html;
+        }
+
+        function removeContact(id) {
+            if (confirm('Remove this emergency contact?')) {
+                emergencyContacts = emergencyContacts.filter(c => c.id !== id);
+                localStorage.setItem('emergencyContacts', JSON.stringify(emergencyContacts));
+                loadEmergencyContacts();
+            }
+        }
+
+        function shareLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const locationUrl = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+                    const message = `My current location: ${locationUrl}`;
+                    
+                    if (navigator.share) {
+                        navigator.share({ text: message });
+                    } else {
+                        navigator.clipboard.writeText(message).then(() => {
+                            alert('Location copied to clipboard! You can now paste and send it.');
+                        });
+                    }
+                });
+            }
+        }
+
+        function startRecording() {
+            alert('Recording feature would start camera/microphone recording here. This requires additional permissions and implementation.');
+        }
+
+        function findSafeRouteHome() {
+            window.location.href = '/map';
+        }
+
+        function fakeCall() {
+            // Simulate incoming call screen
+            document.body.innerHTML = `
+                <div style="background: linear-gradient(45deg, #000, #333); color: white; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: Arial;">
+                    <div class="text-center">
+                        <div style="width: 150px; height: 150px; border-radius: 50%; background: #ccc; margin: 0 auto 20px;"></div>
+                        <h2>Mom</h2>
+                        <p>Incoming call...</p>
+                        <div style="margin-top: 50px;">
+                            <button onclick="location.reload()" style="background: green; color: white; border: none; border-radius: 50px; padding: 15px 30px; margin: 10px; font-size: 18px;">Answer</button>
+                            <button onclick="location.reload()" style="background: red; color: white; border: none; border-radius: 50px; padding: 15px 30px; margin: 10px; font-size: 18px;">Decline</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
